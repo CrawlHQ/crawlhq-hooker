@@ -57,19 +57,13 @@ A powerful Chrome extension that detects, hooks, and visualizes browser fingerpr
    cd crawlhq-hooker
    ```
 
-2. **Install dependencies and generate icons**
-   ```bash
-   npm install
-   npm run generate-icons
-   ```
-
-3. **Load in Chrome**
+2. **Load in Chrome**
    - Open `chrome://extensions/`
    - Enable **Developer mode** (top right toggle)
    - Click **Load unpacked**
    - Select the `crawlhq-hooker` folder
 
-4. **Pin the extension** (optional)
+3. **Pin the extension** (optional)
    - Click the puzzle icon in Chrome toolbar
    - Pin "CrawlHQ Hooker" for easy access
 
