@@ -1,0 +1,36 @@
+{
+  "name": "crawlhq-hooker",
+  "version": "2.1.0",
+  "description": "Comprehensive browser fingerprint detection - hooks and visualizes all fingerprinting attempts across 13 categories",
+  "license": "MIT",
+  "author": "CrawlHQ",
+  "homepage": "https://github.com/CrawlHQ/crawlhq-hooker#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/CrawlHQ/crawlhq-hooker.git"
+  },
+  "bugs": {
+    "url": "https://github.com/CrawlHQ/crawlhq-hooker/issues"
+  },
+  "keywords": [
+    "browser-extension",
+    "fingerprint",
+    "privacy",
+    "canvas-fingerprinting",
+    "webgl",
+    "devtools",
+    "chrome-extension",
+    "security",
+    "anti-fingerprinting",
+    "browser-privacy"
+  ],
+  "scripts": {
+    "generate-icons": "node scripts/generate-icons.js"
+  },
+  "devDependencies": {
+    "pngjs": "^7.0.0"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  }
+}

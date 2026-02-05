@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CrawlHQ Hooker</title>
+  <link rel="stylesheet" href="../shared/styles.css">
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="container">
+    <!-- Header -->
+    <header class="header">
+      <div class="header-title">
+        <img src="../../icons/icon32.png" alt="CrawlHQ" class="logo">
+        <h1>CrawlHQ Hooker</h1>
+      </div>
+      <div class="header-actions">
+        <button id="pauseBtn" class="btn btn-icon btn-pause" title="Pause capture" aria-label="Pause capture">
+          <svg id="pauseIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <rect x="6" y="4" width="4" height="16"/>
+            <rect x="14" y="4" width="4" height="16"/>
+          </svg>
+          <svg id="playIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display: none;" aria-hidden="true">
+            <polygon points="5,3 19,12 5,21"/>
+          </svg>
+          <span id="pauseBufferBadge" class="buffer-badge" style="display: none;">0</span>
+        </button>
+        <button id="refreshBtn" class="btn btn-icon" title="Refresh" aria-label="Refresh captures">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M23 4v6h-6M1 20v-6h6"/>
+            <path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/>
+          </svg>
+        </button>
+        <button id="clearBtn" class="btn btn-icon" title="Clear all" aria-label="Clear all captures">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="3,6 5,6 21,6"/>
+            <path d="M19,6v14a2,2,0,0,1-2,2H7a2,2,0,0,1-2-2V6m3,0V4a2,2,0,0,1,2-2h4a2,2,0,0,1,2,2v2"/>
+            <line x1="10" y1="11" x2="10" y2="17"/>
+            <line x1="14" y1="11" x2="14" y2="17"/>
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- Whitelist Banner -->
+    <div id="whitelistBanner" class="whitelist-banner">
+      <div class="whitelist-info">
+        <span id="whitelistStatus" class="whitelist-status">Not monitoring</span>
+        <span id="whitelistDomain" class="whitelist-domain"></span>
+      </div>
+      <button id="whitelistBtn" class="btn btn-whitelist" aria-label="Toggle page monitoring">
+        <svg class="whitelist-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+          <path class="whitelist-check" d="M9 12l2 2 4-4" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <span id="whitelistBtnText">Monitor this page</span>
+      </button>
+    </div>
+
+    <!-- Reload Behavior -->
+    <div class="mode-bar" id="reloadModeBar">
+      <div class="mode-info">
+        <svg class="mode-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <path d="M21 12a9 9 0 1 1-2.64-6.36"/>
+          <path d="M21 3v6h-6"/>
+        </svg>
+        <div class="mode-text">
+          <span class="mode-label">Reset on reload</span>
+          <span id="reloadModeHint" class="mode-hint">Clears captures on reload</span>
+        </div>
+      </div>
+      <label class="toggle-switch toggle-sm" title="Clear captures when the page reloads">
+        <input type="checkbox" id="clearOnReloadToggle" />
+        <span class="toggle-slider"></span>
+      </label>
+    </div>
+
+    <!-- Health Banner (shown when monitoring is on but detector isn't injected) -->
+    <div id="healthBanner" class="health-banner" style="display: none;">
+      <span id="healthMessage" class="health-message">Detector not injected. Try reloading. Check extension Site access permissions.</span>
+      <button id="healthReloadBtn" class="btn btn-health" aria-label="Reload tab">Reload</button>
+    </div>
+
+    <!-- Stats Bar -->
+    <div class="stats-bar">
+      <div class="stat">
+        <span class="stat-value" id="totalCount">0</span>
+        <span class="stat-label">This Page</span>
+      </div>
+    </div>
+
+    <!-- Search and Filters -->
+    <div class="search-bar">
+      <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="11" cy="11" r="8"/>
+        <path d="M21 21l-4.35-4.35"/>
+      </svg>
+      <input type="text" id="searchInput" class="search-input" placeholder="Search behavior, canvas, webgl..." aria-label="Search captures">
+      <button id="clearSearchBtn" class="btn-clear-search" aria-label="Clear search" style="display: none;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="18" y1="6" x2="6" y2="18"/>
+          <line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Filters -->
+    <div class="filters">
+      <div class="filter-group">
+        <!-- Custom dropdown that stays inside popup -->
+        <div class="custom-dropdown" id="categoryDropdown">
+          <button class="dropdown-toggle" id="categoryToggle" aria-label="Filter by category">
+            <span id="categoryLabel">All Categories</span>
+            <svg class="dropdown-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="6 9 12 15 18 9"/>
+            </svg>
+          </button>
+          <div class="dropdown-menu" id="categoryMenu">
+            <!-- Categories populated dynamically -->
+          </div>
+        </div>
+      </div>
+      <div class="view-toggle">
+        <button id="gridViewBtn" class="btn-view active" title="Grid view">
+          <svg viewBox="0 0 24 24" fill="currentColor">
+            <rect x="3" y="3" width="7" height="7" rx="1"/>
+            <rect x="14" y="3" width="7" height="7" rx="1"/>
+            <rect x="14" y="14" width="7" height="7" rx="1"/>
+            <rect x="3" y="14" width="7" height="7" rx="1"/>
+          </svg>
+        </button>
+        <button id="listViewBtn" class="btn-view" title="List view">
+          <svg viewBox="0 0 24 24" fill="currentColor">
+            <rect x="3" y="4" width="18" height="4" rx="1"/>
+            <rect x="3" y="10" width="18" height="4" rx="1"/>
+            <rect x="3" y="16" width="18" height="4" rx="1"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Captures Container -->
+    <div id="capturesContainer" class="captures-container grid-view">
+      <!-- Dynamic content -->
+    </div>
+
+    <!-- Empty State -->
+    <div id="emptyState" class="empty-state">
+      <svg class="empty-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+        <!-- Hook icon -->
+        <path d="M12 2 L12 10 Q12 16, 8 18 Q4 20, 4 16 Q4 13, 7 12"/>
+        <path d="M7 12 L9 10"/>
+        <circle cx="12" cy="2" r="1.5"/>
+      </svg>
+      <p>No fingerprinting detected</p>
+      <span class="empty-hint">Browser fingerprint API calls will appear here</span>
+    </div>
+
+    <!-- Detail Panel (Slide-in) -->
+    <div id="detailPanel" class="detail-panel">
+      <div class="detail-header">
+        <button id="closeDetailBtn" class="btn btn-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M19 12H5M12 19l-7-7 7-7"/>
+          </svg>
+        </button>
+        <h2>Capture Details</h2>
+      </div>
+      <div id="detailContent" class="detail-content">
+        <!-- Dynamic detail content -->
+      </div>
+    </div>
+
+    <!-- Confirm Modal -->
+    <div id="confirmModal" class="modal-overlay">
+      <div class="modal-content">
+        <div class="modal-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+          </svg>
+        </div>
+        <h3 class="modal-title">Clear Captures?</h3>
+        <p class="modal-message">Clear all captures for this page?</p>
+        <div class="modal-actions">
+          <button id="modalCancelBtn" class="btn btn-secondary">Cancel</button>
+          <button id="modalConfirmBtn" class="btn btn-danger">Clear</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="../shared/category-icons.js"></script>
+  <script src="popup.js"></script>
+</body>
+</html>

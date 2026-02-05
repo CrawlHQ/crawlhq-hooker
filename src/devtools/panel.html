@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CrawlHQ Hooker</title>
+  <link rel="stylesheet" href="../shared/styles.css">
+  <link rel="stylesheet" href="panel.css">
+</head>
+<body>
+  <div class="panel-container">
+    <!-- Toolbar -->
+    <header class="toolbar">
+      <div class="toolbar-left">
+        <div class="toolbar-title">
+          <img src="../../icons/icon32.png" alt="CrawlHQ" class="logo">
+          <span>CrawlHQ Hooker</span>
+        </div>
+      </div>
+      <!-- Stats Bar -->
+      <div class="stats-bar">
+        <div class="stat">
+          <span class="stat-value" id="thisPageCount">0</span>
+          <span class="stat-label">THIS PAGE</span>
+        </div>
+        <div class="stat">
+          <span class="stat-value" id="allTimeCount">0</span>
+          <span class="stat-label">ALL TIME</span>
+        </div>
+        <div class="stat">
+          <span class="stat-value" id="lastHourCount">0</span>
+          <span class="stat-label">LAST HOUR</span>
+        </div>
+      </div>
+      <div class="toolbar-right">
+        <div class="search-box">
+          <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="8"/>
+            <path d="M21 21l-4.35-4.35"/>
+          </svg>
+          <input type="text" id="searchInput" class="input" placeholder="Search...">
+        </div>
+        <select id="categoryFilter" class="select">
+          <option value="">All Categories</option>
+          <!-- Categories populated dynamically based on detected captures -->
+        </select>
+        <button id="exportJsonBtn" class="btn" title="Export as JSON">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+            <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/>
+          </svg>
+          JSON
+        </button>
+        <button id="exportCsvBtn" class="btn" title="Export as CSV">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+            <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/>
+          </svg>
+          CSV
+        </button>
+        <div class="toolbar-toggle" title="Clear captures when the page reloads">
+          <span class="toggle-label">Reset on reload</span>
+          <label class="toggle-switch" aria-label="Toggle reset on reload">
+            <input type="checkbox" id="clearOnReloadToggle">
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+        <button id="pauseBtn" class="btn btn-pause" title="Pause/Resume capture (Spacebar)">
+          <svg id="pauseIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+            <rect x="6" y="4" width="4" height="16"/>
+            <rect x="14" y="4" width="4" height="16"/>
+          </svg>
+          <svg id="playIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16" style="display: none;">
+            <polygon points="5,3 19,12 5,21"/>
+          </svg>
+          <span id="pauseBtnText">Pause</span>
+          <span id="bufferBadge" class="buffer-badge" style="display: none;">0</span>
+        </button>
+        <button id="clearBtn" class="btn btn-danger" title="Clear all">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+            <polyline points="3,6 5,6 21,6"/>
+            <path d="M19,6v14a2,2,0,0,1-2,2H7a2,2,0,0,1-2-2V6m3,0V4a2,2,0,0,1,2-2h4a2,2,0,0,1,2,2v2"/>
+          </svg>
+          Clear
+        </button>
+        <!-- View toggle -->
+        <div class="view-toggle">
+          <button class="btn-view active" id="gridViewBtn" title="Grid view">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+              <rect x="3" y="3" width="7" height="7"/>
+              <rect x="14" y="3" width="7" height="7"/>
+              <rect x="3" y="14" width="7" height="7"/>
+              <rect x="14" y="14" width="7" height="7"/>
+            </svg>
+          </button>
+          <button class="btn-view" id="listViewBtn" title="List view">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+              <line x1="8" y1="6" x2="21" y2="6"/>
+              <line x1="8" y1="12" x2="21" y2="12"/>
+              <line x1="8" y1="18" x2="21" y2="18"/>
+              <line x1="3" y1="6" x2="3.01" y2="6"/>
+              <line x1="3" y1="12" x2="3.01" y2="12"/>
+              <line x1="3" y1="18" x2="3.01" y2="18"/>
+            </svg>
+          </button>
+          <button class="btn-view" id="timelineViewBtn" title="Timeline view">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+              <line x1="12" y1="2" x2="12" y2="22"/>
+              <circle cx="12" cy="6" r="2"/>
+              <circle cx="12" cy="12" r="2"/>
+              <circle cx="12" cy="18" r="2"/>
+              <line x1="14" y1="6" x2="20" y2="6"/>
+              <line x1="14" y1="12" x2="18" y2="12"/>
+              <line x1="14" y1="18" x2="20" y2="18"/>
+            </svg>
+          </button>
+          <button class="btn-view" id="categoryViewBtn" title="Category view">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+              <path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/>
+              <line x1="9" y1="14" x2="15" y2="14"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Whitelist Banner -->
+    <div id="whitelistBanner" class="whitelist-banner">
+      <div class="whitelist-info">
+        <span id="whitelistStatus" class="whitelist-status">Not monitoring</span>
+        <span id="whitelistDomain" class="whitelist-domain"></span>
+      </div>
+      <button id="whitelistBtn" class="btn btn-whitelist" aria-label="Toggle page monitoring">
+        <svg class="whitelist-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+          <path class="whitelist-check" d="M9 12l2 2 4-4" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <span id="whitelistBtnText">Monitor this page</span>
+      </button>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+      <!-- Captures Table (List View) -->
+      <div class="table-container" style="display: none;">
+        <table class="captures-table">
+          <thead>
+            <tr>
+              <th class="col-preview">Preview</th>
+              <th class="col-category sortable" data-sort="category">Category</th>
+              <th class="col-method sortable" data-sort="method">Method</th>
+              <th class="col-source sortable" data-sort="source">Source</th>
+              <th class="col-data">Data</th>
+              <th class="col-time sortable" data-sort="timestamp">Time</th>
+            </tr>
+          </thead>
+          <tbody id="capturesBody">
+            <!-- Dynamic rows -->
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Grid View -->
+      <div class="grid-container" style="display: none;">
+        <div id="gridView" class="grid-view">
+          <!-- Dynamic cards -->
+        </div>
+      </div>
+
+      <!-- Grouped View (Timeline/Category) -->
+      <div class="grouped-container" style="display: none;">
+        <div class="grouped-header">
+          <span id="groupedTitle">Timeline</span>
+          <div class="grouped-actions">
+            <button id="expandAllBtn" class="btn btn-sm" title="Expand all">Expand All</button>
+            <button id="collapseAllBtn" class="btn btn-sm" title="Collapse all">Collapse All</button>
+          </div>
+        </div>
+        <div id="groupedView" class="grouped-view">
+          <!-- Dynamic groups -->
+        </div>
+      </div>
+
+      <!-- Empty State - visible by default until captures load -->
+      <div id="emptyState" class="empty-state visible">
+        <svg class="empty-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M12 2 L12 10 Q12 16, 8 18 Q4 20, 4 16 Q4 13, 7 12"/>
+          <path d="M7 12 L9 10"/>
+          <circle cx="12" cy="2" r="1.5"/>
+        </svg>
+        <p>No fingerprinting attempts detected</p>
+        <span class="empty-hint">Browser fingerprint API calls will appear here in real-time</span>
+      </div>
+
+      <!-- Detail Sidebar -->
+      <aside id="detailSidebar" class="detail-sidebar">
+        <div class="sidebar-header">
+          <h3>Capture Details</h3>
+          <button id="closeSidebarBtn" class="btn btn-icon" title="Close">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M18 6L6 18M6 6l12 12"/>
+            </svg>
+          </button>
+        </div>
+        <div id="sidebarContent" class="sidebar-content">
+          <!-- Dynamic content -->
+        </div>
+      </aside>
+    </div>
+  </div>
+
+  <!-- Performance components -->
+  <script src="core/VirtualGridManager.js"></script>
+  <script src="core/VirtualTableManager.js"></script>
+  <script src="core/LazyThumbLoader.js"></script>
+  <script src="core/RAFScheduler.js"></script>
+  <script src="core/TimelineManager.js"></script>
+  <script src="core/CategoryGroupManager.js"></script>
+  <script src="../shared/category-icons.js"></script>
+  <script src="panel.js"></script>
+</body>
+</html>
